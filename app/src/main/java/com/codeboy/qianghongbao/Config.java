@@ -48,6 +48,7 @@ public class Config {
     private static Config current;
 
     public static synchronized Config getConfig(Context context) {
+        //getApplicationContext()是获得整个应用的上下文，其生命周期是整个应用
         if(current == null) {
             current = new Config(context.getApplicationContext());
         }

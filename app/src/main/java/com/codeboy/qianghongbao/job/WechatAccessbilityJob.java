@@ -129,10 +129,12 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
             if(QiangHongBaoService.isNotificationServiceRunning() && getConfig().isEnableNotificationService()) { //开启快速模式，不处理
                 return;
             }
+            //获取事件的内容
             List<CharSequence> texts = event.getText();
             if(!texts.isEmpty()) {
                 for(CharSequence t : texts) {
                     String text = String.valueOf(t);
+                    //若事件内容中包含关键字“微信红包”
                     if(text.contains(HONGBAO_TEXT_KEY)) {
                         openNotify(event);
                         break;
@@ -213,9 +215,10 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
 
         isReceivingHongbao = true;
         try {
-            //以下是精华，将微信的通知栏消息打开
+            //以下是精华！！！将微信的通知栏消息打开
             Notification notification = (Notification) data;
             PendingIntent pendingIntent = notification.contentIntent;
+            //先确定是不是处于“非锁屏”状态下
             if(!NotifyHelper.isLockScreen(getContext())) {
                 pendingIntent.send();
             }
@@ -223,6 +226,9 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        /*关于pendingIntent:
+        * PendingIntent就是一个可以在满足一定条件下执行的Intent，它相比于Intent的优势在于自己携带有Context对象，这样他就不必依赖于某个activity才可以存在。
+        * */
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)

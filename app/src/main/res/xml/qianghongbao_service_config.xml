@@ -8,3 +8,21 @@
     android:notificationTimeout="100"
     android:accessibilityFlags="flagDefault"
     android:canRetrieveWindowContent="true"/>
+<!---Your service can build and set a configuration using an instance of this class and `setServiceInfo()` at runtime.
+However, not all configuration options are available using this method.
+Beginning with Android 4.0, you can include a <meta-data> element in your manifest with a reference to a configuration file,
+which allows you to set the `full range` of options for your accessibility service
+->
+
+<!-
+`description`
+辅助功能的设置里面开启/关闭 界面的描述
+`accessibilityEventTypes`
+值为typeAllMask时，为响应所有事件(typeNotificationStateChanged通知变化事件，typeWindowStateChanged界面变化事件)
+`packageNames`
+指定响应某个应用的事件,若不填则为所有应用(这里设置的是腾讯的手机QQ和微信的包名)
+`accessibilityFeedbackType`
+设置回馈给用户的方式，是语音播出还是振动
+`notificationTimeout`
+响应时间间隔
+-->

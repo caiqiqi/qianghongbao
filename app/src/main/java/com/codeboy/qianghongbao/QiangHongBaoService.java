@@ -85,10 +85,12 @@ public class QiangHongBaoService extends AccessibilityService {
 
     @Override
     public void onInterrupt() {
+        //服务中断，如授权关闭或者将服务杀死
         Log.d(TAG, "qianghongbao service interrupt");
         Toast.makeText(this, "中断抢红包服务", Toast.LENGTH_SHORT).show();
     }
 
+    /*在“设置”->“辅助功能”里面打开了“抢红包”*/
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -101,11 +103,13 @@ public class QiangHongBaoService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        //接收事件,如触发了通知栏变化、界面变化等
         if(BuildConfig.DEBUG) {
             Log.d(TAG, "事件--->" + event );
         }
         String pkn = String.valueOf(event.getPackageName());
         if(mAccessbilityJobs != null && !mAccessbilityJobs.isEmpty()) {
+            //此时若发现用户并没有同意“免责声明”，则直接返回
             if(!getConfig().isAgreement()) {
                 return;
             }
@@ -121,9 +125,9 @@ public class QiangHongBaoService extends AccessibilityService {
         return Config.getConfig(this);
     }
 
-    /** 接收通知栏事件*/
+    /** 处理接收到的通知栏事件*/
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public static void handeNotificationPosted(IStatusBarNotification notificationService) {
+    public static void handleNotificationPosted(IStatusBarNotification notificationService) {
         if(notificationService == null) {
             return;
         }
@@ -176,7 +180,9 @@ public class QiangHongBaoService extends AccessibilityService {
         //部份手机没有NotificationService服务
         try {
             return QHBNotificationService.isRunning();
-        } catch (Throwable t) {}
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
         return false;
     }
 

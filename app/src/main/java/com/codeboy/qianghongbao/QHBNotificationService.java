@@ -25,6 +25,7 @@ public class QHBNotificationService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
+        //判断当前Android手机的版本号(是否 < 21)
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             onListenerConnected();
         }
@@ -45,7 +46,7 @@ public class QHBNotificationService extends NotificationListenerService {
         if(!getConfig().isEnableNotificationService()) {
             return;
         }
-        QiangHongBaoService.handeNotificationPosted(new IStatusBarNotification() {
+        QiangHongBaoService.handleNotificationPosted(new IStatusBarNotification() {
             @Override
             public String getPackageName() {
                 return sbn.getPackageName();
@@ -86,7 +87,7 @@ public class QHBNotificationService extends NotificationListenerService {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
         service = null;
-        //发送广播，已经连接上了
+        //发送广播，已经断开连接了
         Intent intent = new Intent(Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT);
         sendBroadcast(intent);
     }

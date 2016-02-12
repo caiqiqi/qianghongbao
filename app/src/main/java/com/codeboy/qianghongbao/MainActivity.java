@@ -46,6 +46,7 @@ public class MainActivity extends BaseSettingsActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //打开应用之后再获取标题（涉及到版本号）
         String version = "";
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -53,7 +54,6 @@ public class MainActivity extends BaseSettingsActivity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-
         setTitle(getString(R.string.app_name) + version);
 
         QHBApplication.activityStartMain(this);
@@ -63,6 +63,7 @@ public class MainActivity extends BaseSettingsActivity {
         filter.addAction(Config.ACTION_QIANGHONGBAO_SERVICE_DISCONNECT);
         filter.addAction(Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT);
         filter.addAction(Config.ACTION_NOTIFY_LISTENER_SERVICE_CONNECT);
+        //注册广播
         registerReceiver(qhbConnectReceiver, filter);
     }
 
@@ -71,6 +72,7 @@ public class MainActivity extends BaseSettingsActivity {
         return false;
     }
 
+    /*这里覆写了父类的方法，该方法在MainActivity的super.onCreate()中会调用*/
     @Override
     public Fragment getSettingsFragment() {
         mMainFragment = new MainFragment();
@@ -78,8 +80,8 @@ public class MainActivity extends BaseSettingsActivity {
     }
 
     private BroadcastReceiver qhbConnectReceiver = new BroadcastReceiver() {
-        @Override
         public void onReceive(Context context, Intent intent) {
+            //判断Activity是否已被finish掉，如果Activitiy已被finish，会出bug
             if(isFinishing()) {
                 return;
             }
@@ -106,6 +108,7 @@ public class MainActivity extends BaseSettingsActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //即每次“继续”的时候都会检查服务是否在运行
         if(QiangHongBaoService.isRunning()) {
             if(mTipsDialog != null) {
                 mTipsDialog.dismiss();
@@ -114,6 +117,10 @@ public class MainActivity extends BaseSettingsActivity {
             showOpenAccessibilityServiceDialog();
         }
 
+        /*免责声明  本质是获取preferences的值，只有点击了同意，该值才会为true
+        * 在onResume里面写，保证每次Activity呈现给用户的时候都能看到“免责声明”
+        * 若之前用户未同意，确保用户同意
+        * */
         boolean isAgreement = Config.getConfig(this).isAgreement();
         if(!isAgreement) {
             showAgreementDialog();
@@ -134,21 +141,24 @@ public class MainActivity extends BaseSettingsActivity {
         mTipsDialog = null;
     }
 
+    /*菜单*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
+        //“打开辅助服务”
         MenuItem item = menu.add(0, 0, 1, R.string.open_service_button);
         item.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
-
+        //“打开通知栏服务”
         MenuItem notifyitem = menu.add(0, 3, 2, R.string.open_notify_service);
         notifyitem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
-
+        //“关于CodeBoy抢红包”
         MenuItem about = menu.add(0, 4, 4, R.string.about_title);
         about.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
 
         return super.onCreateOptionsMenu(menu);
     }
 
+    /*菜单*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -197,7 +207,7 @@ public class MainActivity extends BaseSettingsActivity {
         QHBApplication.showShare(this);
     }
 
-    /** 二维码*/
+    /** 二维码 Dialog*/
     private void showQrDialog() {
         final Dialog dialog = new Dialog(this, R.style.QR_Dialog_Theme);
         View view = getLayoutInflater().inflate(R.layout.qr_dialog_layout, null);
@@ -227,7 +237,7 @@ public class MainActivity extends BaseSettingsActivity {
         dialog.show();
     }
 
-    /** 显示捐赠的对话框*/
+    /** 捐赠 Dialog*/
     private void showDonateDialog() {
         final Dialog dialog = new Dialog(this, R.style.QR_Dialog_Theme);
         View view = getLayoutInflater().inflate(R.layout.donate_dialog_layout, null);
@@ -259,15 +269,19 @@ public class MainActivity extends BaseSettingsActivity {
         if(mTipsDialog != null && mTipsDialog.isShowing()) {
             return;
         }
+        //加载进来那个“由上下两个分割线包围的中间夹一个图片的那个view”
         View view = getLayoutInflater().inflate(R.layout.dialog_tips_layout, null);
+        //也就是说这个view本身也有监听点击之后的响应方法！！！
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openAccessibilityServiceSettings();
             }
         });
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.open_service_title);
+        //哦，原来AlertDialog是可以加载任意自定义View的
         builder.setView(view);
         builder.setPositiveButton(R.string.open_service_button, new DialogInterface.OnClickListener() {
             @Override
@@ -310,6 +324,10 @@ public class MainActivity extends BaseSettingsActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
+            /*PreferenceFragment的方法：从xml形式的preference中导进来
+            给这个PreferenceFragment指定了一个xml
+            这样，当打开此界面时可以导入
+            */
             addPreferencesFromResource(R.xml.main);
 
             //微信红包开关

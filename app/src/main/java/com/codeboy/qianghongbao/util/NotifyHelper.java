@@ -76,8 +76,12 @@ public class NotifyHelper {
         return km.inKeyguardRestrictedInputMode() || !isScreenOn(context);
     }
 
+    /**判断屏幕是否亮着*/
     public static boolean isScreenOn(Context context) {
         PowerManager pm = getPowerManager(context);
+        /* isScreenOn ()判断屏幕是否亮着（不管是暗的dimed还是正常亮度），
+        在API 20 被弃用，推荐isInteractive()
+        */
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
             return pm.isInteractive();
         } else {
