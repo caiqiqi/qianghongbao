@@ -12,25 +12,38 @@ import android.content.SharedPreferences;
  */
 public class Config {
 
+    /*断开抢红包辅助服务*/
     public static final String ACTION_QIANGHONGBAO_SERVICE_DISCONNECT = "com.codeboy.qianghongbao.ACCESSBILITY_DISCONNECT";
+    /*连接抢红包辅助服务*/
     public static final String ACTION_QIANGHONGBAO_SERVICE_CONNECT = "com.codeboy.qianghongbao.ACCESSBILITY_CONNECT";
 
     public static final String ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT = "com.codeboy.qianghongbao.NOTIFY_LISTENER_DISCONNECT";
     public static final String ACTION_NOTIFY_LISTENER_SERVICE_CONNECT = "com.codeboy.qianghongbao.NOTIFY_LISTENER_CONNECT";
 
+
     public static final String PREFERENCE_NAME = "config";
+    /*是否启动微信抢红包*/
     public static final String KEY_ENABLE_WECHAT = "KEY_ENABLE_WECHAT";
+    /*微信-打开-红包后的事件*/
     public static final String KEY_WECHAT_AFTER_OPEN_HONGBAO = "KEY_WECHAT_AFTER_OPEN_HONGBAO";
+    /*微信打开红包后延时时间*/
     public static final String KEY_WECHAT_DELAY_TIME = "KEY_WECHAT_DELAY_TIME";
+    /*微信-抢到-红包后的事件*/
     public static final String KEY_WECHAT_AFTER_GET_HONGBAO = "KEY_WECHAT_AFTER_GET_HONGBAO";
+    /*获取抢微信红包的模式*/
     public static final String KEY_WECHAT_MODE = "KEY_WECHAT_MODE";
 
+    /*是否启动通知栏模式*/
     public static final String KEY_NOTIFICATION_SERVICE_ENABLE = "KEY_NOTIFICATION_SERVICE_ENABLE";
 
+    /*是否开启声音*/
     public static final String KEY_NOTIFY_SOUND = "KEY_NOTIFY_SOUND";
+    /*是否开启震动*/
     public static final String KEY_NOTIFY_VIBRATE = "KEY_NOTIFY_VIBRATE";
+    /*是否开启夜间免打扰模式*/
     public static final String KEY_NOTIFY_NIGHT_ENABLE = "KEY_NOTIFY_NIGHT_ENABLE";
 
+    /*是否同意免责声明*/
     private static final String KEY_AGREEMENT = "KEY_AGREEMENT";
 
     public static final int WX_AFTER_OPEN_HONGBAO = 0;//拆红包
@@ -56,6 +69,7 @@ public class Config {
     }
 
     private SharedPreferences preferences;
+    /* Application级别的Context */
     private Context mContext;
 
     private Config(Context context) {

@@ -118,7 +118,7 @@ public final class AccessibilityHelper {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
     }
 
-    /** 返回事件*/
+    /** TODO :模拟执行返回事件*/
     public static void performBack(AccessibilityService service) {
         if(service == null) {
             return;
@@ -126,7 +126,7 @@ public final class AccessibilityHelper {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
     }
 
-    /** 点击事件*/
+    /** 模拟执行点击事件*/
     public static void performClick(AccessibilityNodeInfo nodeInfo) {
         if(nodeInfo == null) {
             return;

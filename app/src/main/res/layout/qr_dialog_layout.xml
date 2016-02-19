@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/follow_qr"/>
 
+    <!--这里是不是也可以用TextView 的 android:leftDrawable这个属性来加入图片-->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

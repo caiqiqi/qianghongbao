@@ -14,14 +14,16 @@ import com.codeboy.qianghongbao.QiangHongBaoService;
  */
 public abstract class BaseAccessbilityJob implements AccessbilityJob {
 
-    private QiangHongBaoService service;
+    /*持有的QIangHongbaoService对象*/
+	private QiangHongBaoService service;
 
+	/*就是将Service对象传过来*/
     @Override
     public void onCreateJob(QiangHongBaoService service) {
         this.service = service;
     }
 
-    public Context getContext() {
+    public Context getApplicationContext() {
         return service.getApplicationContext();
     }
 
@@ -29,7 +31,7 @@ public abstract class BaseAccessbilityJob implements AccessbilityJob {
         return service.getConfig();
     }
 
-    public QiangHongBaoService getService() {
+    public QiangHongBaoService getQiangHongBaoService() {
         return service;
     }
 }
