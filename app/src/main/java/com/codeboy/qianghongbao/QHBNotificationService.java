@@ -15,7 +15,10 @@ import android.util.Log;
  *
  * @author LeonLee
  */
+
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+/* `NotificationListenerService`: A service that receives calls from the *system*
+   when new notifications are posted or removed, or their ranking changed. */
 public class QHBNotificationService extends NotificationListenerService {
 
     private static final String TAG = "QHBNotificationService";
@@ -35,6 +38,7 @@ public class QHBNotificationService extends NotificationListenerService {
         return Config.getConfig(this);
     }
 
+    /*关键代码：一旦状态栏有通知发出之后，响应的方法(是由框架来调用的)*/
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         if(BuildConfig.DEBUG) {
@@ -59,18 +63,22 @@ public class QHBNotificationService extends NotificationListenerService {
         });
     }
 
+    /*一旦状态栏的通知被移除之后，响应的方法(是由框架来调用的)*/
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             super.onNotificationRemoved(sbn);
         }
+        //用来标示是否处在debug状态，从而决定要不要log出来
         if(BuildConfig.DEBUG) {
             Log.i(TAG, "onNotificationRemoved");
         }
     }
 
+    /* 一旦该`NotificationListenerService`被绑定之后，响应的方法（是由框架来调用的）*/
     @Override
     public void onListenerConnected() {
+        //版本 >=21
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             super.onListenerConnected();
         }

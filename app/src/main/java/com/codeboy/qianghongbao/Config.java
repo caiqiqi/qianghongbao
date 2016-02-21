@@ -33,7 +33,7 @@ public class Config {
     /*获取抢微信红包的模式*/
     public static final String KEY_WECHAT_MODE = "KEY_WECHAT_MODE";
 
-    /*是否启动通知栏模式*/
+    /*是否启动"快速监听通知栏"模式*/
     public static final String KEY_NOTIFICATION_SERVICE_ENABLE = "KEY_NOTIFICATION_SERVICE_ENABLE";
 
     /*是否开启声音*/

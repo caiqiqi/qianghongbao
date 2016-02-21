@@ -19,27 +19,35 @@ public final class AccessibilityHelper {
 
     private AccessibilityHelper() {}
 
-    /** 通过id查找*/
+    /** 通过`id`查找*/
     public static AccessibilityNodeInfo findNodeInfosById(AccessibilityNodeInfo nodeInfo, String resId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            //所有能匹配到的，是一个List
             List<AccessibilityNodeInfo> list = nodeInfo.findAccessibilityNodeInfosByViewId(resId);
             if(list != null && !list.isEmpty()) {
+                //只返回List的第一个元素
                 return list.get(0);
             }
         }
         return null;
     }
 
-    /** 通过文本查找*/
+    /**
+     * 通过`Id`(上面)和`文本`(下面)的这两个方法，算法是一样的
+     */
+
+    /** 通过`文本`查找*/
     public static AccessibilityNodeInfo findNodeInfosByText(AccessibilityNodeInfo nodeInfo, String text) {
+        //所有能匹配到的，是一个List
         List<AccessibilityNodeInfo> list = nodeInfo.findAccessibilityNodeInfosByText(text);
         if(list == null || list.isEmpty()) {
             return null;
         }
+        //只返回List的第一个元素
         return list.get(0);
     }
 
-    /** 通过关键字查找*/
+    /** 通过`关键字`查找*/
     public static AccessibilityNodeInfo findNodeInfosByTexts(AccessibilityNodeInfo nodeInfo, String... texts) {
         for(String key : texts) {
             AccessibilityNodeInfo info = findNodeInfosByText(nodeInfo, key);
@@ -50,7 +58,7 @@ public final class AccessibilityHelper {
         return null;
     }
 
-    /** 通过组件名字查找*/
+    /** 通过`组件名字`查找*/
     public static AccessibilityNodeInfo findNodeInfosByClassName(AccessibilityNodeInfo nodeInfo, String className) {
         if(TextUtils.isEmpty(className)) {
             return null;

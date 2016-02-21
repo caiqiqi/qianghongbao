@@ -34,9 +34,9 @@ import java.util.List;
  *
  * @author LeonLee
  */
-public class WechatAccessbilityJob extends BaseAccessbilityJob {
+public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
-    private static final String TAG = "WechatAccessbilityJob";
+    private static final String TAG = "WechatAccessibilityJob";
 
     /** 微信的包名*/
     public static final String WECHAT_PACKAGENAME = "com.tencent.mm";
@@ -87,6 +87,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
         }
     };
 
+    /*主要是在上下文中注册广播*/
     @Override
     public void onCreateJob(QiangHongBaoService service) {
         super.onCreateJob(service);
@@ -104,6 +105,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
         getApplicationContext().registerReceiver(broadcastReceiver, filter);
     }
 
+    /*就是在上下文中注销掉广播*/
     @Override
     public void onStopJob() {
         try {
@@ -143,6 +145,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
 
     @Override
     public void onReceiveJob(AccessibilityEvent event) {
+        //事件类型
         final int eventType = event.getEventType();
         //通知栏事件
         if(eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {

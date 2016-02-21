@@ -8,9 +8,14 @@ import android.app.Notification;
  * <p><a href="http://www.happycodeboy.com">LeonLee Blog</a></p>
  *
  * @author LeonLee
+ * 这两个接口方法声明 跟 `android.service.notification.StatusBarNotification`里的API是一样的 ！
  */
 public interface IStatusBarNotification {
 
+    /*The package of the app that posted the notification*/
     String getPackageName();
+    /* The Notification supplied to notify(int, Notification).
+     NotificationManager.notify(): Post a notification to be shown in the status bar
+     */
     Notification getNotification();
 }

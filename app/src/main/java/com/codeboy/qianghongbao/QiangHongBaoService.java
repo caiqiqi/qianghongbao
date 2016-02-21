@@ -12,7 +12,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.codeboy.qianghongbao.job.AccessbilityJob;
-import com.codeboy.qianghongbao.job.WechatAccessbilityJob;
+import com.codeboy.qianghongbao.job.WechatAccessibilityJob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,8 +29,11 @@ public class QiangHongBaoService extends AccessibilityService {
 
     private static final String TAG = "QiangHongBao";
 
+    private static final String QIANGHONGBAO_SERVICE_INTERRUPTED = "中断抢红包服务";
+    private static final String QIANGHONGBAO_SERVICE_CONNECTED = "已连接抢红包服务" ;
+
     private static final Class[] ACCESSBILITY_JOBS= {
-            WechatAccessbilityJob.class,
+            WechatAccessibilityJob.class,
     };
 
     private static QiangHongBaoService service;
@@ -51,6 +54,7 @@ public class QiangHongBaoService extends AccessibilityService {
                 Object object = clazz.newInstance();
                 if(object instanceof AccessbilityJob) {
                     AccessbilityJob job = (AccessbilityJob) object;
+                    /*onCreateJob*/
                     job.onCreateJob(this);
                     mAccessbilityJobs.add(job);
                     mPkgAccessbilityJobMap.put(job.getTargetPackageName(), job);
@@ -64,14 +68,17 @@ public class QiangHongBaoService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "qianghongbao service destory");
+        Log.d(TAG, "qianghongbao service destoryed");
         if(mPkgAccessbilityJobMap != null) {
+			//Map.clear()的实现也是讲Map中所有元素都赋值null
             mPkgAccessbilityJobMap.clear();
         }
         if(mAccessbilityJobs != null && !mAccessbilityJobs.isEmpty()) {
             for (AccessbilityJob job : mAccessbilityJobs) {
+                /*onStopJob*/
                 job.onStopJob();
             }
+			//List.clear()的实现其实也是遍历list内数组将各个元素赋值null，让gc去回收每个元素
             mAccessbilityJobs.clear();
         }
 
@@ -83,22 +90,24 @@ public class QiangHongBaoService extends AccessibilityService {
         sendBroadcast(intent);
     }
 
+	/*服务中断，如授权关闭或者将服务杀死*/
     @Override
     public void onInterrupt() {
-        //服务中断，如授权关闭或者将服务杀死
         Log.d(TAG, "qianghongbao service interrupt");
-        Toast.makeText(this, "中断抢红包服务", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, QIANGHONGBAO_SERVICE_INTERRUPTED, Toast.LENGTH_SHORT).show();
     }
 
-    /*在“设置”->“辅助功能”里面打开了“抢红包”*/
+    /*复写AccessibilityService的方法*/
     @Override
+	//在“设置”->“辅助功能”里面打开了“抢红包”
     protected void onServiceConnected() {
         super.onServiceConnected();
+		//在这个辅助服务开启之后，这个service对象才赋有值，不然下面判断if(service==null)就通不过
         service = this;
         //发送广播，已经连接上了
         Intent intent = new Intent(Config.ACTION_QIANGHONGBAO_SERVICE_CONNECT);
         sendBroadcast(intent);
-        Toast.makeText(this, "已连接抢红包服务", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, QIANGHONGBAO_SERVICE_CONNECTED, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -115,6 +124,7 @@ public class QiangHongBaoService extends AccessibilityService {
             }
             for (AccessbilityJob job : mAccessbilityJobs) {
                 if(pkn.equals(job.getTargetPackageName()) && job.isEnable()) {
+                    /*onReceiveJob*/
                     job.onReceiveJob(event);
                 }
             }
@@ -127,6 +137,7 @@ public class QiangHongBaoService extends AccessibilityService {
 
     /** 处理接收到的通知栏事件*/
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	//注意：方法是静态的，所以是外部类直接调用
     public static void handleNotificationPosted(IStatusBarNotification notificationService) {
         if(notificationService == null) {
             return;
@@ -139,11 +150,12 @@ public class QiangHongBaoService extends AccessibilityService {
         if(job == null) {
             return;
         }
+        /*onNotificationPosted*/
         job.onNotificationPosted(notificationService);
     }
 
     /**
-     * 判断当前服务是否正在运行
+     * 判断当前辅助服务是否正在运行
      * */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static boolean isRunning() {

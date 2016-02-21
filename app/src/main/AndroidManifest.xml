@@ -37,7 +37,6 @@
             android:label="@string/main_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -52,6 +51,7 @@
         <activity android:name=".AboutMeActivity"
                   android:label="@string/about_title"/>
 
+		<!-- 继承自AccessibilityService-模拟用户点击事件-->
         <service
             android:name=".QiangHongBaoService"
             android:enabled="true"
@@ -62,11 +62,14 @@
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
 
+			<!--meta-data就像其名一样，主要用来定义一些组件相关的配置值.按照官方定义，meta-data是一组供父组件使用的名值对（name-value pair）-->
+			<!-- ActivityInfo.metadata.getString("meta_name")来得到-->
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/qianghongbao_service_config" />
         </service>
 
+        <!-- 继承自NotificationListenerService-监听通知栏的通知-->
         <service android:name=".QHBNotificationService"
                  android:label="@string/app_name"
                  android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">

@@ -26,7 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.codeboy.qianghongbao.job.WechatAccessbilityJob;
+import com.codeboy.qianghongbao.job.WechatAccessibilityJob;
 import com.codeboy.qianghongbao.util.BitmapUtils;
 
 import java.io.File;
@@ -39,11 +39,24 @@ import java.io.File;
  */
 public class MainActivity extends BaseSettingsActivity {
 
+    /* "关注codeboy微信" */
+    private static final String KEY_FOLLOW_ME =       "KEY_FOLLOW_ME" ;
+    /* "打赏开发者" */
+    private static final String KEY_DONATE_ME =       "KEY_DONATE_ME" ;
+    /* "微信设置" */
+    private static final String KEY_WECHAT_SETTINGS = "WECHAT_SETTINGS" ;
+    /* 红包提醒设置 */
+    private static final String KEY_NOTIFY_SETTINGS = "NOTIFY_SETTINGS" ;
+
+
+    /*提示开启辅助服务的Dialog*/
     private Dialog mTipsDialog;
+    /*待装载的Fragment*/
     private MainFragment mMainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*这里调用父类BaseActivity的onCreate()中的代码，getSettingsFragment(),而该方法在本类中被复写*/
         super.onCreate(savedInstanceState);
 
         //打开应用之后再获取标题（涉及到版本号）
@@ -56,6 +69,7 @@ public class MainActivity extends BaseSettingsActivity {
         }
         setTitle(getString(R.string.app_name) + version);
 
+        //暂时没有实现
         QHBApplication.activityStartMain(this);
 
         IntentFilter filter = new IntentFilter();
@@ -72,7 +86,7 @@ public class MainActivity extends BaseSettingsActivity {
         return false;
     }
 
-    /*这里覆写了父类的方法，该方法在MainActivity的super.onCreate()中会调用*/
+    /*这里覆写了父类BaseActivity的方法，该方法在MainActivity的super.onCreate()中会调用*/
     @Override
     public Fragment getSettingsFragment() {
         mMainFragment = new MainFragment();
@@ -221,7 +235,7 @@ public class MainActivity extends BaseSettingsActivity {
 
                 //跳到微信
                 Intent wxIntent = getPackageManager().getLaunchIntentForPackage(
-                        WechatAccessbilityJob.WECHAT_PACKAGENAME);
+                        WechatAccessibilityJob.WECHAT_PACKAGENAME);
                 if(wxIntent != null) {
                     try {
                         startActivity(wxIntent);
@@ -295,8 +309,11 @@ public class MainActivity extends BaseSettingsActivity {
     /** 打开辅助服务的设置*/
     private void openAccessibilityServiceSettings() {
         try {
+            // 固有Action："android.settings.ACCESSIBILITY_SETTINGS"
             Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            // 即打开“设置”里面的“辅助服务”这个界面
             startActivity(intent);
+            // “找到[codeboy]抢红包，然后开启服务即可”
             Toast.makeText(this, R.string.tips, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -307,8 +324,11 @@ public class MainActivity extends BaseSettingsActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private void openNotificationServiceSettings() {
         try {
+            // 固有Action："android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+            // 应该是“设置”里面的“通知使用权”这个界面
             startActivity(intent);
+            // "找到[CodeBoy抢红包]，然后开启服务即可"
             Toast.makeText(this, R.string.tips, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -317,7 +337,9 @@ public class MainActivity extends BaseSettingsActivity {
 
     public static class MainFragment extends BaseSettingsFragment {
 
+        /* "快速监听通知栏"开关 */
         private SwitchPreference notificationPref;
+        /* 是否开启-"快速监听通知栏"开关*/
         private boolean targetNotificationValue;
 
         @Override
@@ -330,7 +352,7 @@ public class MainActivity extends BaseSettingsActivity {
             */
             addPreferencesFromResource(R.xml.main);
 
-            //微信红包开关
+            // 1. 微信红包开关
             Preference wechatPref = findPreference(Config.KEY_ENABLE_WECHAT);
             wechatPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -346,6 +368,41 @@ public class MainActivity extends BaseSettingsActivity {
                 wechatPref.setTitle("暂时不能使用");
             }
 
+            // 2. "关注codeboy微信"
+            findPreference(KEY_FOLLOW_ME).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    // TODO: 这里可以传一个参数
+                    /*显示 "关注微信" 二维码Dialog*/
+                    ((MainActivity)getActivity()).showQrDialog();
+                    QHBApplication.eventStatistics(getActivity(), "about_author");
+                    return true;
+                }
+            });
+
+            // 3. 打赏二维码
+            findPreference(KEY_DONATE_ME).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    // TODO: 这里可以传一个参数
+                    /*显示 "打赏二维码" 二维码Dialog*/
+                    ((MainActivity)getActivity()).showDonateDialog();
+                    QHBApplication.eventStatistics(getActivity(), "donate");
+                    return true;
+                }
+            });
+
+            // 4. 微信设置
+            findPreference(KEY_WECHAT_SETTINGS).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    /* Activity-微信设置 */
+                    startActivity(new Intent(getActivity(), WechatSettingsActivity.class));
+                    return true;
+                }
+            });
+
+            // 5. 快速监听通知栏
             notificationPref = (SwitchPreference) findPreference(Config.KEY_NOTIFICATION_SERVICE_ENABLE);
             notificationPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -364,35 +421,11 @@ public class MainActivity extends BaseSettingsActivity {
                 }
             });
 
-            findPreference("KEY_FOLLOW_ME").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            // 6. 红包提醒设置
+            findPreference(KEY_NOTIFY_SETTINGS).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    ((MainActivity)getActivity()).showQrDialog();
-                    QHBApplication.eventStatistics(getActivity(), "about_author");
-                    return true;
-                }
-            });
-
-            findPreference("KEY_DONATE_ME").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    ((MainActivity)getActivity()).showDonateDialog();
-                    QHBApplication.eventStatistics(getActivity(), "donate");
-                    return true;
-                }
-            });
-
-            findPreference("WECHAT_SETTINGS").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    startActivity(new Intent(getActivity(), WechatSettingsActivity.class));
-                    return true;
-                }
-            });
-
-            findPreference("NOTIFY_SETTINGS").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
+                    /* Activity-红包提醒设置*/
                     startActivity(new Intent(getActivity(), NotifySettingsActivity.class));
                     return true;
                 }
