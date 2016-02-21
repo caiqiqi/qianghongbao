@@ -54,7 +54,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
     /* 看一看大家手气 */
     private static final String TEX_KEY_KAN_SHOUQI = "看看大家的手气" ;
     /* 返回 */
-    private static final String TEXT_KEY_FANHUI = "返回" ;
+    private static final String TEXT_KEY_BACK = "返回" ;
     /*通过组件查找*/
     private static final String BUTTON_CLASS_NAME = "android.widget.Button";
 
@@ -82,7 +82,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //更新安装包信息
+            //更新安装包信息(因为获取微信的版本时会用到)
             updatePackageInfo();
         }
     };
@@ -91,6 +91,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
     public void onCreateJob(QiangHongBaoService service) {
         super.onCreateJob(service);
 
+        //更新安装包信息(因为获取微信的版本时会用到)
         updatePackageInfo();
 
         IntentFilter filter = new IntentFilter();
@@ -189,7 +190,7 @@ public class WechatAccessbilityJob extends BaseAccessbilityJob {
         if(target != null) {
             title = String.valueOf(target.getText());
         }
-        List<AccessibilityNodeInfo> list = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY_FANHUI);
+        List<AccessibilityNodeInfo> list = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY_BACK);
 
         if(list != null && !list.isEmpty()) {
             AccessibilityNodeInfo parent = null;
