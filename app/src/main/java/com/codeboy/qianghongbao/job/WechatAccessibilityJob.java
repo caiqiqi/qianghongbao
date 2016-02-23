@@ -21,7 +21,7 @@ import com.codeboy.qianghongbao.BuildConfig;
 import com.codeboy.qianghongbao.Config;
 import com.codeboy.qianghongbao.IStatusBarNotification;
 import com.codeboy.qianghongbao.QHBApplication;
-import com.codeboy.qianghongbao.QiangHongBaoService;
+import com.codeboy.qianghongbao.QHBAccessibilityService;
 import com.codeboy.qianghongbao.util.AccessibilityHelper;
 import com.codeboy.qianghongbao.util.NotifyHelper;
 
@@ -89,7 +89,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
     /*主要是在上下文中注册广播*/
     @Override
-    public void onCreateJob(QiangHongBaoService service) {
+    public void onCreateJob(QHBAccessibilityService service) {
         super.onCreateJob(service);
 
         //更新安装包信息(因为获取微信的版本时会用到)
@@ -149,7 +149,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
         final int eventType = event.getEventType();
         //通知栏事件
         if(eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
-            if(QiangHongBaoService.isNotificationServiceRunning() && getConfig().isEnableNotificationService()) { //开启快速模式，不处理
+            if(QHBAccessibilityService.isNotificationServiceRunning() && getConfig().isEnableNotificationService()) { //开启快速模式，不处理
                 return;
             }
             //获取事件的内容

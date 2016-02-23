@@ -47,7 +47,8 @@ public class MainActivity extends BaseSettingsActivity {
     private static final String KEY_WECHAT_SETTINGS = "WECHAT_SETTINGS" ;
     /* 红包提醒设置 */
     private static final String KEY_NOTIFY_SETTINGS = "NOTIFY_SETTINGS" ;
-
+    /*注册qhb*/
+    private static final String REGISTER_RECEIVER_FAILED = "qhbConnectReceiver is null,registerReceiver failed!";
 
     /*提示开启辅助服务的Dialog*/
     private Dialog mTipsDialog;
@@ -59,6 +60,31 @@ public class MainActivity extends BaseSettingsActivity {
         /*这里调用父类BaseActivity的onCreate()中的代码，getSettingsFragment(),而该方法在本类中被复写*/
         super.onCreate(savedInstanceState);
 
+        setApplicationTitle();
+
+        //暂时没有实现
+        QHBApplication.activityStartMain(this);
+
+        registerQhbConnectReceiver();
+
+    }
+
+    private void registerQhbConnectReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Config.ACTION_QHB_ACCESSIBILITY_SERVICE_CONNECT);
+        filter.addAction(Config.ACTION_QHB_ACCESSIBILITY_SERVICE_DISCONNECT);
+        filter.addAction(Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT);
+        filter.addAction(Config.ACTION_NOTIFY_LISTENER_SERVICE_CONNECT);
+        //注册广播
+        if(qhbConnectReceiver != null){
+            registerReceiver(qhbConnectReceiver, filter);
+        }else {
+            Toast.makeText(MainActivity.this,REGISTER_RECEIVER_FAILED,Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*得到应用的版本信息并显示在ActionBar上*/
+    private void setApplicationTitle() {
         //打开应用之后再获取标题（涉及到版本号）
         String version = "";
         try {
@@ -68,17 +94,6 @@ public class MainActivity extends BaseSettingsActivity {
             e.printStackTrace();
         }
         setTitle(getString(R.string.app_name) + version);
-
-        //暂时没有实现
-        QHBApplication.activityStartMain(this);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Config.ACTION_QIANGHONGBAO_SERVICE_CONNECT);
-        filter.addAction(Config.ACTION_QIANGHONGBAO_SERVICE_DISCONNECT);
-        filter.addAction(Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT);
-        filter.addAction(Config.ACTION_NOTIFY_LISTENER_SERVICE_CONNECT);
-        //注册广播
-        registerReceiver(qhbConnectReceiver, filter);
     }
 
     @Override
@@ -101,43 +116,63 @@ public class MainActivity extends BaseSettingsActivity {
             }
             String action = intent.getAction();
             Log.d("MainActivity", "receive-->" + action);
-            if(Config.ACTION_QIANGHONGBAO_SERVICE_CONNECT.equals(action)) {
-                if (mTipsDialog != null) {
-                    mTipsDialog.dismiss();
-                }
-            } else if(Config.ACTION_QIANGHONGBAO_SERVICE_DISCONNECT.equals(action)) {
-                showOpenAccessibilityServiceDialog();
-            } else if(Config.ACTION_NOTIFY_LISTENER_SERVICE_CONNECT.equals(action)) {
-                if(mMainFragment != null) {
-                    mMainFragment.updateNotifyPreference();
-                }
-            } else if(Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT.equals(action)) {
-                if(mMainFragment != null) {
-                    mMainFragment.updateNotifyPreference();
-                }
+
+            switch(action){
+                //若抢红包辅助服务已连接，但DIalog依然在显示，则dismiss掉
+                case Config.ACTION_QHB_ACCESSIBILITY_SERVICE_CONNECT:
+                    if (mTipsDialog != null) {
+                        mTipsDialog.dismiss();
+                    }
+                    break;
+                //若抢红包辅助服务状态为未连接，则展示Dialog
+                case Config.ACTION_QHB_ACCESSIBILITY_SERVICE_DISCONNECT:
+                    showOpenAccessibilityServiceDialog();
+                    break;
+                case Config.ACTION_NOTIFY_LISTENER_SERVICE_CONNECT:
+                    if(mMainFragment != null) {
+                        mMainFragment.updateNotifyPreference();
+                    }
+                    break;
+                case Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT:
+                    if(mMainFragment != null) {
+                        mMainFragment.updateNotifyPreference();
+                    }
+                    break;
             }
+
         }
     };
 
     @Override
     protected void onResume() {
         super.onResume();
-        //即每次“继续”的时候都会检查服务是否在运行
-        if(QiangHongBaoService.isRunning()) {
+
+        checkQiangHongBaoService();
+
+        checkIsAgreement();
+
+
+    }
+
+    /*免责声明  本质是获取preferences的值，只有点击了同意，该值才会为true
+    * 在onResume里面写，保证每次Activity呈现给用户的时候都能看到“免责声明”
+    * 若之前用户未同意，确保用户同意
+    * */
+    private void checkIsAgreement() {
+        boolean isAgreement = Config.getConfig(this).isAgreement();
+        if(!isAgreement) {
+            showAgreementDialog();
+        }
+    }
+
+    /**检查抢红包服务是否在运行*/
+    private void checkQiangHongBaoService() {
+        if(QHBAccessibilityService.isAccessibilityServiceRunning()) {
             if(mTipsDialog != null) {
                 mTipsDialog.dismiss();
             }
         } else {
             showOpenAccessibilityServiceDialog();
-        }
-
-        /*免责声明  本质是获取preferences的值，只有点击了同意，该值才会为true
-        * 在onResume里面写，保证每次Activity呈现给用户的时候都能看到“免责声明”
-        * 若之前用户未同意，确保用户同意
-        * */
-        boolean isAgreement = Config.getConfig(this).isAgreement();
-        if(!isAgreement) {
-            showAgreementDialog();
         }
     }
 
@@ -185,11 +220,15 @@ public class MainActivity extends BaseSettingsActivity {
                 QHBApplication.eventStatistics(this, "menu_notify");
                 break;
             case 4:
-                startActivity(new Intent(this, AboutMeActivity.class));
+                openAboutMeActivity();
                 QHBApplication.eventStatistics(this, "menu_about");
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openAboutMeActivity() {
+        startActivity(new Intent(this, AboutMeActivity.class));
     }
 
     /** 显示免责声明的对话框*/
@@ -357,7 +396,7 @@ public class MainActivity extends BaseSettingsActivity {
             wechatPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if((Boolean) newValue && !QiangHongBaoService.isRunning()) {
+                    if((Boolean) newValue && !QHBAccessibilityService.isAccessibilityServiceRunning()) {
                         ((MainActivity)getActivity()).showOpenAccessibilityServiceDialog();
                     }
                     return true;
@@ -412,7 +451,7 @@ public class MainActivity extends BaseSettingsActivity {
                         return false;
                     }
                     targetNotificationValue = (Boolean)newValue;
-                    if((Boolean) newValue && !QiangHongBaoService.isNotificationServiceRunning()) {
+                    if((Boolean) newValue && !QHBAccessibilityService.isNotificationServiceRunning()) {
                         ((MainActivity)getActivity()).openNotificationServiceSettings();
                         return false;
                     }
@@ -437,10 +476,10 @@ public class MainActivity extends BaseSettingsActivity {
             if(notificationPref == null) {
                 return;
             }
-            if(targetNotificationValue && !notificationPref.isChecked() && QiangHongBaoService.isNotificationServiceRunning()) {
+            if(targetNotificationValue && !notificationPref.isChecked() && QHBAccessibilityService.isNotificationServiceRunning()) {
                 QHBApplication.eventStatistics(getActivity(), "notify_service", String.valueOf(true));
                 notificationPref.setChecked(true);
-            } else if(notificationPref.isChecked() && !QiangHongBaoService.isNotificationServiceRunning()) {
+            } else if(notificationPref.isChecked() && !QHBAccessibilityService.isNotificationServiceRunning()) {
                 notificationPref.setChecked(false);
             }
         }

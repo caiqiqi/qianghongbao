@@ -13,9 +13,9 @@ import android.content.SharedPreferences;
 public class Config {
 
     /*断开抢红包辅助服务*/
-    public static final String ACTION_QIANGHONGBAO_SERVICE_DISCONNECT = "com.codeboy.qianghongbao.ACCESSBILITY_DISCONNECT";
+    public static final String ACTION_QHB_ACCESSIBILITY_SERVICE_DISCONNECT = "com.codeboy.qianghongbao.ACCESSBILITY_DISCONNECT";
     /*连接抢红包辅助服务*/
-    public static final String ACTION_QIANGHONGBAO_SERVICE_CONNECT = "com.codeboy.qianghongbao.ACCESSBILITY_CONNECT";
+    public static final String ACTION_QHB_ACCESSIBILITY_SERVICE_CONNECT = "com.codeboy.qianghongbao.ACCESSBILITY_CONNECT";
 
     public static final String ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT = "com.codeboy.qianghongbao.NOTIFY_LISTENER_DISCONNECT";
     public static final String ACTION_NOTIFY_LISTENER_SERVICE_CONNECT = "com.codeboy.qianghongbao.NOTIFY_LISTENER_CONNECT";

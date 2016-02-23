@@ -3,7 +3,7 @@ package com.codeboy.qianghongbao.job;
 import android.content.Context;
 
 import com.codeboy.qianghongbao.Config;
-import com.codeboy.qianghongbao.QiangHongBaoService;
+import com.codeboy.qianghongbao.QHBAccessibilityService;
 
 /**
  * <p>Created 16/1/16 上午12:38.</p>
@@ -15,11 +15,11 @@ import com.codeboy.qianghongbao.QiangHongBaoService;
 public abstract class BaseAccessbilityJob implements AccessbilityJob {
 
     /*持有的QIangHongbaoService对象*/
-	private QiangHongBaoService service;
+	private QHBAccessibilityService service;
 
 	/*就是将Service对象传过来*/
     @Override
-    public void onCreateJob(QiangHongBaoService service) {
+    public void onCreateJob(QHBAccessibilityService service) {
         this.service = service;
     }
 
@@ -31,7 +31,7 @@ public abstract class BaseAccessbilityJob implements AccessbilityJob {
         return service.getConfig();
     }
 
-    public QiangHongBaoService getQiangHongBaoService() {
+    public QHBAccessibilityService getQiangHongBaoService() {
         return service;
     }
 }

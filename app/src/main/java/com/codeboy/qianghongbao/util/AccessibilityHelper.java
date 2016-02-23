@@ -47,7 +47,9 @@ public final class AccessibilityHelper {
         return list.get(0);
     }
 
-    /** 通过`关键字`查找*/
+    /** 通过`关键字`查找(对各个关键字轮流调用`findNodeInfosByText`)
+     * @param texts :不定长度的字符串参数
+     * */
     public static AccessibilityNodeInfo findNodeInfosByTexts(AccessibilityNodeInfo nodeInfo, String... texts) {
         for(String key : texts) {
             AccessibilityNodeInfo info = findNodeInfosByText(nodeInfo, key);
@@ -72,7 +74,7 @@ public final class AccessibilityHelper {
         return null;
     }
 
-    /** 找父组件*/
+    /** [no usage]找父组件*/
     public static AccessibilityNodeInfo findParentNodeInfosByClassName(AccessibilityNodeInfo nodeInfo, String className) {
         if(nodeInfo == null) {
             return null;
@@ -99,6 +101,7 @@ public final class AccessibilityHelper {
         sSourceNodeField = field;
     }
 
+    /*[no usage]*/
     public static long getSourceNodeId (AccessibilityNodeInfo nodeInfo) {
         if(sSourceNodeField == null) {
             return -1;
@@ -111,6 +114,7 @@ public final class AccessibilityHelper {
         return -1;
     }
 
+    /*[no usage]*/
     public static String getViewIdResourceName(AccessibilityNodeInfo nodeInfo) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             return nodeInfo.getViewIdResourceName();
@@ -126,7 +130,7 @@ public final class AccessibilityHelper {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
     }
 
-    /** TODO :模拟执行返回事件*/
+    /* [no usage]*/
     public static void performBack(AccessibilityService service) {
         if(service == null) {
             return;

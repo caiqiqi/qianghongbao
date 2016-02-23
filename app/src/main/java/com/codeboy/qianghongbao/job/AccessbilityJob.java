@@ -3,7 +3,7 @@ package com.codeboy.qianghongbao.job;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.codeboy.qianghongbao.IStatusBarNotification;
-import com.codeboy.qianghongbao.QiangHongBaoService;
+import com.codeboy.qianghongbao.QHBAccessibilityService;
 
 /**
  * <p>Created 16/1/16 上午12:32.</p>
@@ -14,7 +14,7 @@ import com.codeboy.qianghongbao.QiangHongBaoService;
  */
 public interface AccessbilityJob {
     String getTargetPackageName();
-    void onCreateJob(QiangHongBaoService service);
+    void onCreateJob(QHBAccessibilityService service);
     void onReceiveJob(AccessibilityEvent event);
     void onStopJob();
     void onNotificationPosted(IStatusBarNotification service);

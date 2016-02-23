@@ -25,18 +25,18 @@ import java.util.List;
  *
  * 抢红包外挂服务
  */
-public class QiangHongBaoService extends AccessibilityService {
+public class QHBAccessibilityService extends AccessibilityService {
 
-    private static final String TAG = "QiangHongBao";
+    private static final String TAG = "QHBAccessibilityService";
 
-    private static final String QIANGHONGBAO_SERVICE_INTERRUPTED = "中断抢红包服务";
-    private static final String QIANGHONGBAO_SERVICE_CONNECTED = "已连接抢红包服务" ;
+    private static final String QHB_ACCESSIBILITY_SERVICE_INTERRUPTED = "中断抢红包服务";
+    private static final String QHB_ACCESSIBILITY_SERVICE_CONNECTED = "已连接抢红包服务" ;
 
     private static final Class[] ACCESSBILITY_JOBS= {
             WechatAccessibilityJob.class,
     };
 
-    private static QiangHongBaoService service;
+    private static QHBAccessibilityService service;
 
     private List<AccessbilityJob> mAccessbilityJobs;
     private HashMap<String, AccessbilityJob> mPkgAccessbilityJobMap;
@@ -86,7 +86,7 @@ public class QiangHongBaoService extends AccessibilityService {
         mAccessbilityJobs = null;
         mPkgAccessbilityJobMap = null;
         //发送广播，已经断开辅助服务
-        Intent intent = new Intent(Config.ACTION_QIANGHONGBAO_SERVICE_DISCONNECT);
+        Intent intent = new Intent(Config.ACTION_QHB_ACCESSIBILITY_SERVICE_DISCONNECT);
         sendBroadcast(intent);
     }
 
@@ -94,7 +94,7 @@ public class QiangHongBaoService extends AccessibilityService {
     @Override
     public void onInterrupt() {
         Log.d(TAG, "qianghongbao service interrupt");
-        Toast.makeText(this, QIANGHONGBAO_SERVICE_INTERRUPTED, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, QHB_ACCESSIBILITY_SERVICE_INTERRUPTED, Toast.LENGTH_SHORT).show();
     }
 
     /*复写AccessibilityService的方法*/
@@ -105,9 +105,9 @@ public class QiangHongBaoService extends AccessibilityService {
 		//在这个辅助服务开启之后，这个service对象才赋有值，不然下面判断if(service==null)就通不过
         service = this;
         //发送广播，已经连接上了
-        Intent intent = new Intent(Config.ACTION_QIANGHONGBAO_SERVICE_CONNECT);
+        Intent intent = new Intent(Config.ACTION_QHB_ACCESSIBILITY_SERVICE_CONNECT);
         sendBroadcast(intent);
-        Toast.makeText(this, QIANGHONGBAO_SERVICE_CONNECTED, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, QHB_ACCESSIBILITY_SERVICE_CONNECTED, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -158,7 +158,7 @@ public class QiangHongBaoService extends AccessibilityService {
      * 判断当前辅助服务是否正在运行
      * */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public static boolean isRunning() {
+    public static boolean isAccessibilityServiceRunning() {
         if(service == null) {
             return false;
         }
