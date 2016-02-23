@@ -31,7 +31,7 @@ public abstract class BaseAccessbilityJob implements AccessbilityJob {
         return service.getConfig();
     }
 
-    public QHBAccessibilityService getQiangHongBaoService() {
+    public QHBAccessibilityService getQHBAccessibilityService() {
         return service;
     }
 }

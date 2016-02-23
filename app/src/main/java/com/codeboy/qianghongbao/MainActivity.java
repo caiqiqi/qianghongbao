@@ -147,7 +147,7 @@ public class MainActivity extends BaseSettingsActivity {
     protected void onResume() {
         super.onResume();
 
-        checkQiangHongBaoService();
+        checkQHBAccessibilityService();
 
         checkIsAgreement();
 
@@ -166,8 +166,8 @@ public class MainActivity extends BaseSettingsActivity {
     }
 
     /**检查抢红包服务是否在运行*/
-    private void checkQiangHongBaoService() {
-        if(QHBAccessibilityService.isAccessibilityServiceRunning()) {
+    private void checkQHBAccessibilityService() {
+        if(QHBAccessibilityService.isQHBAccessibilityServiceRunning()) {
             if(mTipsDialog != null) {
                 mTipsDialog.dismiss();
             }
@@ -227,6 +227,7 @@ public class MainActivity extends BaseSettingsActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*打开"关于我"的Activity */
     private void openAboutMeActivity() {
         startActivity(new Intent(this, AboutMeActivity.class));
     }
@@ -274,7 +275,7 @@ public class MainActivity extends BaseSettingsActivity {
 
                 //跳到微信
                 Intent wxIntent = getPackageManager().getLaunchIntentForPackage(
-                        WechatAccessibilityJob.WECHAT_PACKAGENAME);
+                        WechatAccessibilityJob.WECHAT_PACKAGE_NAME);
                 if(wxIntent != null) {
                     try {
                         startActivity(wxIntent);
@@ -359,7 +360,7 @@ public class MainActivity extends BaseSettingsActivity {
         }
     }
 
-    /** 打开通知栏设置*/
+    /** 打开监听通知栏设置*/
     @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private void openNotificationServiceSettings() {
         try {
@@ -396,13 +397,13 @@ public class MainActivity extends BaseSettingsActivity {
             wechatPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if((Boolean) newValue && !QHBAccessibilityService.isAccessibilityServiceRunning()) {
+                    if((Boolean) newValue && !QHBAccessibilityService.isQHBAccessibilityServiceRunning()) {
                         ((MainActivity)getActivity()).showOpenAccessibilityServiceDialog();
                     }
                     return true;
                 }
             });
-            if(!UmengConfig.isEnableWechat(getActivity())) {
+            if(!UmengConfig.isEnabledWechat(getActivity())) {
                 wechatPref.setEnabled(false);
                 wechatPref.setTitle("暂时不能使用");
             }

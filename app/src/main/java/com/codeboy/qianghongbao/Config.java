@@ -78,12 +78,12 @@ public class Config {
     }
 
     /** 是否启动微信抢红包*/
-    public boolean isEnableWechat() {
-        return preferences.getBoolean(KEY_ENABLE_WECHAT, true) && UmengConfig.isEnableWechat(mContext);
+    public boolean isEnabledWechat() {
+        return preferences.getBoolean(KEY_ENABLE_WECHAT, true) && UmengConfig.isEnabledWechat(mContext);
     }
 
     /** 微信打开红包后的事件*/
-    public int getWechatAfterOpenHongBaoEvent() {
+    public int getWechatAfterUnpackHongBaoEvent() {
         int defaultValue = 0;
         String result =  preferences.getString(KEY_WECHAT_AFTER_OPEN_HONGBAO, String.valueOf(defaultValue));
         try {
@@ -123,7 +123,7 @@ public class Config {
     }
 
     /** 是否启动通知栏模式*/
-    public boolean isEnableNotificationService() {
+    public boolean isEnabledNotificationService() {
         return preferences.getBoolean(KEY_NOTIFICATION_SERVICE_ENABLE, false);
     }
 

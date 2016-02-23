@@ -17,13 +17,13 @@ import android.util.Log;
  */
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-/* `NotificationListenerService`: A service that receives calls from the *system*
+/* `NotificationListenerService`: A sQHBNotifiService that receives calls from the *system*
    when new notifications are posted or removed, or their ranking changed. */
 public class QHBNotificationService extends NotificationListenerService {
 
     private static final String TAG = "QHBNotificationService";
 
-    private static QHBNotificationService service;
+    private static QHBNotificationService sQHBNotifiService;
 
     @Override
     public void onCreate() {
@@ -47,7 +47,7 @@ public class QHBNotificationService extends NotificationListenerService {
         if(!getConfig().isAgreement()) {
             return;
         }
-        if(!getConfig().isEnableNotificationService()) {
+        if(!getConfig().isEnabledNotificationService()) {
             return;
         }
         QHBAccessibilityService.handleNotificationPosted(new IStatusBarNotification() {
@@ -84,7 +84,7 @@ public class QHBNotificationService extends NotificationListenerService {
         }
 
         Log.i(TAG, "onListenerConnected");
-        service = this;
+        sQHBNotifiService = this;
         //发送广播，已经连接上了
         Intent intent = new Intent(Config.ACTION_NOTIFY_LISTENER_SERVICE_CONNECT);
         sendBroadcast(intent);
@@ -94,15 +94,15 @@ public class QHBNotificationService extends NotificationListenerService {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
-        service = null;
+        sQHBNotifiService = null;
         //发送广播，已经断开连接了
         Intent intent = new Intent(Config.ACTION_NOTIFY_LISTENER_SERVICE_DISCONNECT);
         sendBroadcast(intent);
     }
 
-    /** 是否启动通知栏监听*/
-    public static boolean isRunning() {
-        if(service == null) {
+    /** 判断是否启动通知栏监听*/
+    public static boolean isNotificationServiceRunning() {
+        if(sQHBNotifiService == null) {
             return false;
         }
         return true;

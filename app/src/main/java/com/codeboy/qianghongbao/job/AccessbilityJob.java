@@ -18,5 +18,5 @@ public interface AccessbilityJob {
     void onReceiveJob(AccessibilityEvent event);
     void onStopJob();
     void onNotificationPosted(IStatusBarNotification service);
-    boolean isEnable();
+    boolean isEnabled();
 }

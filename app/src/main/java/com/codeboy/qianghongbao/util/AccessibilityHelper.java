@@ -88,31 +88,32 @@ public final class AccessibilityHelper {
         return findParentNodeInfosByClassName(nodeInfo.getParent(), className);
     }
 
-    private static final Field sSourceNodeField;
+    /*这里的static变量应该初始化，不然会报错*/
+//    private static final Field sSourceNodeField;
 
-    static {
-        Field field = null;
-        try {
-            field = AccessibilityNodeInfo.class.getDeclaredField("mSourceNodeId");
-            field.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        sSourceNodeField = field;
-    }
+//    static {
+//        Field field = null;
+//        try {
+//            field = AccessibilityNodeInfo.class.getDeclaredField("mSourceNodeId");
+//            field.setAccessible(true);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        sSourceNodeField = field;
+//    }
 
     /*[no usage]*/
-    public static long getSourceNodeId (AccessibilityNodeInfo nodeInfo) {
-        if(sSourceNodeField == null) {
-            return -1;
-        }
-        try {
-            return sSourceNodeField.getLong(nodeInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
+//    public static long getSourceNodeId (AccessibilityNodeInfo nodeInfo) {
+//        if(sSourceNodeField == null) {
+//            return -1;
+//        }
+//        try {
+//            return sSourceNodeField.getLong(nodeInfo);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return -1;
+//    }
 
     /*[no usage]*/
     public static String getViewIdResourceName(AccessibilityNodeInfo nodeInfo) {
@@ -122,7 +123,7 @@ public final class AccessibilityHelper {
         return null;
     }
 
-    /** 返回主界面事件*/
+    /** 模拟返回主界面事件*/
     public static void performHome(AccessibilityService service) {
         if(service == null) {
             return;
@@ -130,7 +131,7 @@ public final class AccessibilityHelper {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
     }
 
-    /* [no usage]*/
+    /* [no usage] 模拟"BACK"事件 */
     public static void performBack(AccessibilityService service) {
         if(service == null) {
             return;

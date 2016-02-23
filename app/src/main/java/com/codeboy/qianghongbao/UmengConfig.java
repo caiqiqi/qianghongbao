@@ -15,7 +15,7 @@ public final class UmengConfig {
 
     }
 
-    public static boolean isEnableWechat(Context context) {
+    public static boolean isEnabledWechat(Context context) {
         return true;
     }
 }

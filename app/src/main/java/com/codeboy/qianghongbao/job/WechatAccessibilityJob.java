@@ -37,9 +37,8 @@ import java.util.List;
 public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
     private static final String TAG = "WechatAccessibilityJob";
-
     /** 微信的包名*/
-    public static final String WECHAT_PACKAGENAME = "com.tencent.mm";
+    public static final String WECHAT_PACKAGE_NAME = "com.tencent.mm";
 
     /* 红包消息的关键字*/
     private static final String TEXT_KEY_HONGBAO = "[微信红包]";
@@ -64,9 +63,9 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
     private static final int WINDOW_NONE = 0;
 	/*微信群聊或者单聊的发布红包的地方*/
-    private static final int WINDOW_LUCKYMONEY_RECEIVEUI = 1;
+    private static final int WINDOW_HONGBAO_RECEIVEUI = 1;
 	/*打开红包之后的“红包细节” */
-    private static final int WINDOW_LUCKYMONEY_DETAIL = 2;
+    private static final int WINDOW_HONGBAO_DETAIL = 2;
 	/*桌面*/
     private static final int WINDOW_LAUNCHER = 3;
     private static final int WINDOW_OTHER = -1;
@@ -76,6 +75,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
 	/* 判断是否发布了红包 */
     private boolean isReceivingHongbao;
+    /*包信息（微信的），为了得到版本号（微信的）*/
     private PackageInfo mWechatPackageInfo = null;
     private Handler mHandler = null;
 
@@ -133,14 +133,14 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
     }
 
     @Override
-    public boolean isEnable() {
-        return getConfig().isEnableWechat();
+    public boolean isEnabled() {
+        return getConfig().isEnabledWechat();
     }
 
     /*获取微信包名——"com.tencent.mm" */
     @Override
     public String getTargetPackageName() {
-        return WECHAT_PACKAGENAME;
+        return WECHAT_PACKAGE_NAME;
     }
 
     @Override
@@ -149,7 +149,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
         final int eventType = event.getEventType();
         //通知栏事件
         if(eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
-            if(QHBAccessibilityService.isNotificationServiceRunning() && getConfig().isEnableNotificationService()) { //开启快速模式，不处理
+            if(QHBAccessibilityService.isNotificationServiceRunning() && getConfig().isEnabledNotificationService()) { //开启快速模式，不处理
                 return;
             }
             //获取事件的内容
@@ -159,13 +159,13 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
                     String text = String.valueOf(t);
                     //若事件内容中包含关键字“微信红包”
                     if(text.contains(TEXT_KEY_HONGBAO)) {
-                        openNotify(event);
+                        openNotification(event);
                         break;
                     }
                 }
             }
         } else if(eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            openHongBao(event);
+            unpackHongBao(event);
         } else if(eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             if(mCurrentWindow != WINDOW_LAUNCHER) { //不在聊天界面或聊天列表，不处理
                 return;
@@ -177,7 +177,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
     }
 
     /** 是否为群聊天*/
-    private boolean isMemberChatUi(AccessibilityNodeInfo nodeInfo) {
+    private boolean isGroupChatUi(AccessibilityNodeInfo nodeInfo) {
         if(nodeInfo == null) {
             return false;
         }
@@ -230,13 +230,13 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
     /** 打开通知栏消息*/
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void openNotify(AccessibilityEvent event) {
+    private void openNotification(AccessibilityEvent event) {
         Parcelable data = event.getParcelableData();
         if(data == null || !(data instanceof Notification)) {
             return;
         }
 
-        /*能够进入 openNotify()这个方法内部，认为已经发布了红包（这个逻辑判断的责任交给调用这个方法的地方）*/
+        /*能够进入 openNotification()这个方法内部，则认为已经发布了红包（这个逻辑判断的责任交给调用这个方法的地方）*/
         isReceivingHongbao = true;
         try {
             //以下是精华！！！将微信的通知栏消息打开
@@ -256,16 +256,17 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void openHongBao(AccessibilityEvent event) {
+    /*unpackHongBao这个名字就比之前的openHongBao要好*/
+    private void unpackHongBao(AccessibilityEvent event) {
         if("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyReceiveUI".equals(event.getClassName())) {
-            mCurrentWindow = WINDOW_LUCKYMONEY_RECEIVEUI;
+            mCurrentWindow = WINDOW_HONGBAO_RECEIVEUI;
             //点中了红包，下一步就是去拆红包
-            handleLuckyMoneyReceive();
+            handleHongBaoReceived();
         } else if("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyDetailUI".equals(event.getClassName())) {
-            mCurrentWindow = WINDOW_LUCKYMONEY_DETAIL;
+            mCurrentWindow = WINDOW_HONGBAO_DETAIL;
             //拆完红包后看详细的纪录界面
             if(getConfig().getWechatAfterGetHongBaoEvent() == Config.WX_AFTER_GET_GOHOME) { //返回主界面，以便收到下一次的红包通知
-                AccessibilityHelper.performHome(getQiangHongBaoService());
+                AccessibilityHelper.performHome(getQHBAccessibilityService());
             }
         } else if("com.tencent.mm.ui.LauncherUI".equals(event.getClassName())) {
             mCurrentWindow = WINDOW_LAUNCHER;
@@ -280,8 +281,8 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
      * 点击聊天里的红包后，显示的界面
      * */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void handleLuckyMoneyReceive() {
-        AccessibilityNodeInfo nodeInfo = getQiangHongBaoService().getRootInActiveWindow();
+    private void handleHongBaoReceived() {
+        AccessibilityNodeInfo nodeInfo = getQHBAccessibilityService().getRootInActiveWindow();
         if(nodeInfo == null) {
             Log.w(TAG, "rootWindow为空");
             return;
@@ -289,7 +290,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
 
         AccessibilityNodeInfo targetNode = null;
 
-        int event = getConfig().getWechatAfterOpenHongBaoEvent();
+        int event = getConfig().getWechatAfterUnpackHongBaoEvent();
         int wechatVersion = getWechatVersion();
         if(event == Config.WX_AFTER_OPEN_HONGBAO) { //拆红包
             if (wechatVersion < USE_ID_MIN_VERSION) {
@@ -365,14 +366,14 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
             return;
         }
 
-        AccessibilityNodeInfo nodeInfo = getQiangHongBaoService().getRootInActiveWindow();
+        AccessibilityNodeInfo nodeInfo = getQHBAccessibilityService().getRootInActiveWindow();
         if(nodeInfo == null) {
             Log.w(TAG, "rootWindow为空");
             return;
         }
 
         if(mode != Config.WX_MODE_0) {
-            boolean isMember = isMemberChatUi(nodeInfo);
+            boolean isMember = isGroupChatUi(nodeInfo);
             if(mode == Config.WX_MODE_1 && isMember) {//过滤群聊
                 return;
             } else if(mode == Config.WX_MODE_2 && !isMember) { //过滤单聊
@@ -422,7 +423,7 @@ public class WechatAccessibilityJob extends BaseAccessbilityJob {
     /** 更新微信包信息*/
     private void updatePackageInfo() {
         try {
-            mWechatPackageInfo = getApplicationContext().getPackageManager().getPackageInfo(WECHAT_PACKAGENAME, 0);
+            mWechatPackageInfo = getApplicationContext().getPackageManager().getPackageInfo(WECHAT_PACKAGE_NAME, 0);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }

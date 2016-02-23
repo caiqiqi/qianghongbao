@@ -36,17 +36,18 @@ public class QHBAccessibilityService extends AccessibilityService {
             WechatAccessibilityJob.class,
     };
 
-    private static QHBAccessibilityService service;
+    private static QHBAccessibilityService sService;
 
-    private List<AccessbilityJob> mAccessbilityJobs;
-    private HashMap<String, AccessbilityJob> mPkgAccessbilityJobMap;
+    private List<AccessbilityJob> mList_jobs;
+    //Key：应用的包名
+    private HashMap<String, AccessbilityJob> mMap_jobs;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        mAccessbilityJobs = new ArrayList<>();
-        mPkgAccessbilityJobMap = new HashMap<>();
+        mList_jobs = new ArrayList<>();
+        mMap_jobs = new HashMap<>();
 
         //初始化辅助插件工作
         for(Class clazz : ACCESSBILITY_JOBS) {
@@ -56,8 +57,8 @@ public class QHBAccessibilityService extends AccessibilityService {
                     AccessbilityJob job = (AccessbilityJob) object;
                     /*onCreateJob*/
                     job.onCreateJob(this);
-                    mAccessbilityJobs.add(job);
-                    mPkgAccessbilityJobMap.put(job.getTargetPackageName(), job);
+                    mList_jobs.add(job);
+                    mMap_jobs.put(job.getTargetPackageName(), job);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -68,62 +69,63 @@ public class QHBAccessibilityService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "qianghongbao service destoryed");
-        if(mPkgAccessbilityJobMap != null) {
+        Log.d(TAG, "qianghongbao sService destoryed");
+        if(mMap_jobs != null) {
 			//Map.clear()的实现也是讲Map中所有元素都赋值null
-            mPkgAccessbilityJobMap.clear();
+            mMap_jobs.clear();
         }
-        if(mAccessbilityJobs != null && !mAccessbilityJobs.isEmpty()) {
-            for (AccessbilityJob job : mAccessbilityJobs) {
+        if(mList_jobs != null && !mList_jobs.isEmpty()) {
+            for (AccessbilityJob job : mList_jobs) {
                 /*onStopJob*/
                 job.onStopJob();
             }
 			//List.clear()的实现其实也是遍历list内数组将各个元素赋值null，让gc去回收每个元素
-            mAccessbilityJobs.clear();
+            mList_jobs.clear();
         }
 
-        service = null;
-        mAccessbilityJobs = null;
-        mPkgAccessbilityJobMap = null;
+        sService = null;
+        mList_jobs = null;
+        mMap_jobs = null;
         //发送广播，已经断开辅助服务
         Intent intent = new Intent(Config.ACTION_QHB_ACCESSIBILITY_SERVICE_DISCONNECT);
         sendBroadcast(intent);
     }
 
-	/*服务中断，如授权关闭或者将服务杀死*/
-    @Override
-    public void onInterrupt() {
-        Log.d(TAG, "qianghongbao service interrupt");
-        Toast.makeText(this, QHB_ACCESSIBILITY_SERVICE_INTERRUPTED, Toast.LENGTH_SHORT).show();
-    }
-
     /*复写AccessibilityService的方法*/
     @Override
-	//在“设置”->“辅助功能”里面打开了“抢红包”
+    //在“设置”->“辅助功能”里面打开了“抢红包”
     protected void onServiceConnected() {
         super.onServiceConnected();
-		//在这个辅助服务开启之后，这个service对象才赋有值，不然下面判断if(service==null)就通不过
-        service = this;
+        //在这个辅助服务开启之后，这个service对象才赋有值，不然下面判断if(sService==null)就通不过
+        sService = this;
         //发送广播，已经连接上了
         Intent intent = new Intent(Config.ACTION_QHB_ACCESSIBILITY_SERVICE_CONNECT);
         sendBroadcast(intent);
         Toast.makeText(this, QHB_ACCESSIBILITY_SERVICE_CONNECTED, Toast.LENGTH_SHORT).show();
     }
 
+	/*服务中断，如授权关闭或者将服务杀死*/
+    @Override
+    public void onInterrupt() {
+        Log.d(TAG, "qianghongbao sService interrupt");
+        Toast.makeText(this, QHB_ACCESSIBILITY_SERVICE_INTERRUPTED, Toast.LENGTH_SHORT).show();
+    }
+
+
+    /*接收事件,如触发了通知栏变化、界面变化等*/
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        //接收事件,如触发了通知栏变化、界面变化等
         if(BuildConfig.DEBUG) {
             Log.d(TAG, "事件--->" + event );
         }
         String pkn = String.valueOf(event.getPackageName());
-        if(mAccessbilityJobs != null && !mAccessbilityJobs.isEmpty()) {
+        if(mList_jobs != null && !mList_jobs.isEmpty()) {
             //此时若发现用户并没有同意“免责声明”，则直接返回
             if(!getConfig().isAgreement()) {
                 return;
             }
-            for (AccessbilityJob job : mAccessbilityJobs) {
-                if(pkn.equals(job.getTargetPackageName()) && job.isEnable()) {
+            for (AccessbilityJob job : mList_jobs) {
+                if(pkn.equals(job.getTargetPackageName()) && job.isEnabled()) {
                     /*onReceiveJob*/
                     job.onReceiveJob(event);
                 }
@@ -138,32 +140,32 @@ public class QHBAccessibilityService extends AccessibilityService {
     /** 处理接收到的通知栏事件*/
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	//注意：方法是静态的，所以是外部类直接调用
-    public static void handleNotificationPosted(IStatusBarNotification notificationService) {
-        if(notificationService == null) {
+    public static void handleNotificationPosted(IStatusBarNotification notification) {
+        if(notification == null) {
             return;
         }
-        if(service == null || service.mPkgAccessbilityJobMap == null) {
+        if(sService == null || sService.mMap_jobs == null) {
             return;
         }
-        String pack = notificationService.getPackageName();
-        AccessbilityJob job = service.mPkgAccessbilityJobMap.get(pack);
+        String pkgName = notification.getPackageName();
+        AccessbilityJob job = sService.mMap_jobs.get(pkgName);
         if(job == null) {
             return;
         }
         /*onNotificationPosted*/
-        job.onNotificationPosted(notificationService);
+        job.onNotificationPosted(notification);
     }
 
     /**
      * 判断当前辅助服务是否正在运行
      * */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public static boolean isAccessibilityServiceRunning() {
-        if(service == null) {
+    public static boolean isQHBAccessibilityServiceRunning() {
+        if(sService == null) {
             return false;
         }
-        AccessibilityManager accessibilityManager = (AccessibilityManager) service.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        AccessibilityServiceInfo info = service.getServiceInfo();
+        AccessibilityManager accessibilityManager = (AccessibilityManager) sService.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        AccessibilityServiceInfo info = sService.getServiceInfo();
         if(info == null) {
             return false;
         }
@@ -184,14 +186,14 @@ public class QHBAccessibilityService extends AccessibilityService {
         return true;
     }
 
-    /** 快速读取通知栏服务是否启动*/
+    /** 判断快速读取通知栏服务是否启动*/
     public static boolean isNotificationServiceRunning() {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
             return false;
         }
         //部份手机没有NotificationService服务
         try {
-            return QHBNotificationService.isRunning();
+            return QHBNotificationService.isNotificationServiceRunning();
         } catch (Throwable t) {
             t.printStackTrace();
         }
