@@ -29,6 +29,7 @@ public class NotifyHelper {
     /** 播放声音*/
     public static void playSound(Context context) {
         try {
+            //因为这个文件被我删除了，所以没有声音了呵呵呵
             MediaPlayer player = MediaPlayer.create(context,
                     Uri.parse("file:///system/media/audio/ui/camera_click.ogg"));
             player.start();

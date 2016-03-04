@@ -125,7 +125,7 @@ public class QHBAccessibilityService extends AccessibilityService {
                 return;
             }
             for (AccessbilityJob job : mList_jobs) {
-                if(pkn.equals(job.getTargetPackageName()) && job.isEnabled()) {
+                if(pkn.equals(job.getTargetPackageName()) && job.isEnabledWechat()) {
                     /*onReceiveJob*/
                     job.onReceiveJob(event);
                 }

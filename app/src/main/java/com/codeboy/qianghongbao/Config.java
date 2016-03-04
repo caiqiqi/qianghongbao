@@ -24,12 +24,13 @@ public class Config {
     public static final String PREFERENCE_NAME = "config";
     /*是否启动微信抢红包*/
     public static final String KEY_ENABLE_WECHAT = "KEY_ENABLE_WECHAT";
-    /*微信-打开-红包后的事件*/
-    public static final String KEY_WECHAT_AFTER_OPEN_HONGBAO = "KEY_WECHAT_AFTER_OPEN_HONGBAO";
-    /*微信打开红包后延时时间*/
+    /*微信拆开红包后延时时间*/
     public static final String KEY_WECHAT_DELAY_TIME = "KEY_WECHAT_DELAY_TIME";
+    /*微信-拆开红包后的事件*/
+    public static final String KEY_EVENT_WECHAT_AFTER_UNPACK_HONGBAO = "KEY_EVENT_WECHAT_AFTER_UNPACK_HONGBAO";
     /*微信-抢到-红包后的事件*/
-    public static final String KEY_WECHAT_AFTER_GET_HONGBAO = "KEY_WECHAT_AFTER_GET_HONGBAO";
+    public static final String KEY_EVENT_WECHAT_AFTER_GET_HONGBAO = "KEY_EVENT_WECHAT_AFTER_GET_HONGBAO";
+
     /*获取抢微信红包的模式*/
     public static final String KEY_WECHAT_MODE = "KEY_WECHAT_MODE";
 
@@ -50,7 +51,7 @@ public class Config {
     public static final int WX_AFTER_OPEN_SEE = 1; //看大家手气
     public static final int WX_AFTER_OPEN_NONE = 2; //静静地看着
 
-    public static final int WX_AFTER_GET_GOHOME = 0; //返回桌面
+    public static final int WX_AFTER_GET_GO_HOME = 0; //返回桌面
     public static final int WX_AFTER_GET_NONE = 1;
 
     public static final int WX_MODE_0 = 0;//自动抢
@@ -82,10 +83,10 @@ public class Config {
         return preferences.getBoolean(KEY_ENABLE_WECHAT, true) && UmengConfig.isEnabledWechat(mContext);
     }
 
-    /** 微信打开红包后的事件*/
+    /** 微信拆开红包后的事件*/
     public int getWechatAfterUnpackHongBaoEvent() {
         int defaultValue = 0;
-        String result =  preferences.getString(KEY_WECHAT_AFTER_OPEN_HONGBAO, String.valueOf(defaultValue));
+        String result =  preferences.getString(KEY_EVENT_WECHAT_AFTER_UNPACK_HONGBAO, String.valueOf(defaultValue));
         try {
             return Integer.parseInt(result);
         } catch (Exception e) {}
@@ -95,14 +96,24 @@ public class Config {
     /** 微信抢到红包后的事件*/
     public int getWechatAfterGetHongBaoEvent() {
         int defaultValue = 1;
-        String result =  preferences.getString(KEY_WECHAT_AFTER_GET_HONGBAO, String.valueOf(defaultValue));
+        String result =  preferences.getString(KEY_EVENT_WECHAT_AFTER_GET_HONGBAO, String.valueOf(defaultValue));
         try {
             return Integer.parseInt(result);
         } catch (Exception e) {}
         return defaultValue;
     }
 
-    /** 微信打开红包后延时时间*/
+    /** 得到事件代号：“抢到红包后” 或者 “拆开红包后”*/
+    public int getHongBaoEvent(String eventName,int defaultValue) {
+
+        String result = preferences.getString(eventName, String.valueOf(defaultValue));
+        try {
+            return Integer.parseInt(result);
+        } catch (Exception e) {}
+        return defaultValue;
+    }
+
+    /** 微信拆开红包后延时时间*/
     public int getWechatOpenDelayTime() {
         int defaultValue = 0;
         String result = preferences.getString(KEY_WECHAT_DELAY_TIME, String.valueOf(defaultValue));
