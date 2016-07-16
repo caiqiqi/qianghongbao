@@ -34,7 +34,7 @@ public class AboutMeActivity extends BaseActivity {
         //下面几个Settings好像不写也行
         WebSettings settings = mWebView.getSettings();
         settings.setUseWideViewPort(true);    // it loads the WebView with the attributes defined in the meta tag of the webpage. So it scales the webpage as defined in the html.
-        settings.setLoadWithOverviewMode(true);    //使WebView显示的界面显示完全缩小。loads the WebView completely zoomed out
+//        settings.setLoadWithOverviewMode(true);    //使WebView显示的界面显示完全缩小。loads the WebView completely zoomed out
 		/*设置webview加载的页面的模式,这方法可以让你的页面适应手机屏幕的分辨率，完整的显示在屏幕上，可以放大缩小。*/
 //        settings.setBuiltInZoomControls(true);//设置使支持缩放(不过好像不好使)
 
